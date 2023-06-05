@@ -1,0 +1,36 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'com.gdssecurity'
+version '1.0'
+sourceCompatibility = 17
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.msgpack:msgpack-core:0.9.3'
+    implementation 'net.portswigger.burp.extensions:montoya-api:2023.4'
+    implementation 'org.json:json:20220924'
+    implementation 'org.apache.parquet:parquet-common:1.12.3'
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes "Main-Class": "com.gdssecurity.BlazorTrafficProcessor"
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
