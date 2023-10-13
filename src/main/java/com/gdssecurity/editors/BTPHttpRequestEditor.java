@@ -135,17 +135,19 @@ public class BTPHttpRequestEditor implements ExtensionProvidedHttpRequestEditor 
         if (requestResponse.request().httpVersion() == null) {
             return false;
         }
-        if (requestResponse.url() == null) {
+        if (requestResponse.request().url() == null) {
             return false;
         }
-        if (!this._montoya.scope().isInScope(requestResponse.url())) {
+        if (!this._montoya.scope().isInScope(requestResponse.request().url())) {
             return false;
         }
         if (requestResponse.request().contentType() == ContentType.JSON) {
             return false;
         }
-        if (!requestResponse.url().contains(BTPConstants.BLAZOR_URL)) {
-            return false;
+        if (!requestResponse.request().url().contains(BTPConstants.BLAZOR_URL)) {
+            if (!requestResponse.request().hasHeader(BTPConstants.SIGNALR_HEADER)) {
+                return false;
+            }
         }
         if (requestResponse.request().body() == null || requestResponse.request().body().length() == 0) {
             return false;

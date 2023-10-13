@@ -83,9 +83,11 @@ public class BTPContextMenuItemsProvider implements ContextMenuItemsProvider {
      * @param selection - the selected HttpRequestResponse object
      */
     private void sendSelectionToBTP(HttpRequestResponse selection) {
-        if (selection.url() != null && !selection.url().contains(BTPConstants.BLAZOR_URL)) {
-            this._logging.logToError("[-] sendSelectionToBTP - Selected message is not BlazorPack.");
-            return;
+        if (selection.request().url() != null && !selection.request().url().contains(BTPConstants.BLAZOR_URL)) {
+            if (!selection.request().hasHeader(BTPConstants.SIGNALR_HEADER)) {
+                this._logging.logToError("[-] sendSelectionToBTP - Selected message is not BlazorPack.");
+                return;
+            }
         }
         if (selection.request() != null && selection.request().body() != null && selection.request().body().length() != 0) {
             this.btpTab.setEditorText(selection.request().body());

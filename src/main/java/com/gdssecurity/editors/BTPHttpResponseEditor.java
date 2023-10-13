@@ -111,10 +111,12 @@ public class BTPHttpResponseEditor implements ExtensionProvidedHttpResponseEdito
         if (requestResponse.response().httpVersion() == null) {
             return false;
         }
-        if (!requestResponse.url().contains(BTPConstants.BLAZOR_URL)) {
-            return false;
+        if (!requestResponse.request().url().contains(BTPConstants.BLAZOR_URL)) {
+            if (!requestResponse.request().hasHeader(BTPConstants.SIGNALR_HEADER)) {
+                return false;
+            }
         }
-        if (!this._montoya.scope().isInScope(requestResponse.url())) {
+        if (!this._montoya.scope().isInScope(requestResponse.request().url())) {
             return false;
         }
         if (requestResponse.response().body() == null || requestResponse.response().body().length() == 0) {
