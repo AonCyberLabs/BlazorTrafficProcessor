@@ -22,6 +22,7 @@ import burp.api.montoya.proxy.http.InterceptedRequest;
 import burp.api.montoya.proxy.http.ProxyRequestHandler;
 import burp.api.montoya.proxy.http.ProxyRequestReceivedAction;
 import burp.api.montoya.proxy.http.ProxyRequestToBeSentAction;
+import com.gdssecurity.helpers.BTPConstants;
 
 /**
  * Class to handle highlighting requests that use BlazorPack
@@ -49,6 +50,9 @@ public class BTPHttpRequestHandler implements ProxyRequestHandler {
     @Override
     public ProxyRequestReceivedAction handleRequestReceived(InterceptedRequest interceptedRequest) {
         if (interceptedRequest.body().length() != 0 && interceptedRequest.path().contains("_blazor?id")) {
+            interceptedRequest.annotations().setHighlightColor(HighlightColor.CYAN);
+        }
+        if (interceptedRequest.hasHeader(BTPConstants.SIGNALR_HEADER)) {
             interceptedRequest.annotations().setHighlightColor(HighlightColor.CYAN);
         }
         return ProxyRequestReceivedAction.continueWith(interceptedRequest);

@@ -36,6 +36,7 @@ public final class BTPConstants {
     public static final String NEGOTIATE_URL = "negotiate?negotiateVersion=";
     public static final Pattern BODY_OFFSET = Pattern.compile("(\r\n\r\n)");
     public static final String HEX_FORMAT = "%02X";
+    public static final String SIGNALR_HEADER = "X-Signalr-User-Agent";
 
     // Downgrade Constants (WS -> HTTP)
     public static final String TRANSPORT_STR = "[{'transport':'ServerSentEvents','transferFormats':['Text']},{'transport':'LongPolling','transferFormats':['Text','Binary']}]";
