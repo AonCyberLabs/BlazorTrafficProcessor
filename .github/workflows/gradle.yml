@@ -42,6 +42,7 @@ jobs:
           else
             PREFIX="NotMainBranch_"
           fi
+          echo "PREFIX=$PREFIX" >> $GITHUB_ENV
           PREVIOUS_TAG=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                              https://api.github.com/repos/${{ github.repository }}/git/refs/tags \
                              | jq -r ".[] | select(.ref | startswith(\"refs/tags/${PREFIX}\")) | .ref" \
