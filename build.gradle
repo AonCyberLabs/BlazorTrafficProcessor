@@ -25,12 +25,23 @@ test {
     //useJUnitPlatform()
 }
 
-jar {
+jar{
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    manifest {
-        attributes "Main-Class": "com.gdssecurity.BlazorTrafficProcessor"
-    }
+    archivesBaseName = project.name
     from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        (configurations.runtimeClasspath).collect { it.isDirectory() ? it : zipTree(it) }
+    }{
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+        exclude "META-INF/*.txt"
     }
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:unchecked"
+}
+
+tasks.withType(Jar) {
+    destinationDirectory = file("$rootDir/releases/")
 }
