@@ -45,6 +45,7 @@ public class BTPView extends JComponent {
     private String buttonText;
     private JComboBox<String> dropDownMenu;
     private BlazorHelper blazorHelper;
+    private JCheckBox useWebSocketCheckBox;
     private final int DESERIALIZE_IDX = 0;
     private final int SERIALIZE_IDX = 1;
 
@@ -96,6 +97,16 @@ public class BTPView extends JComponent {
             this.results.setContents(ByteArray.byteArray(""));
         });
         this.buttonView.add(this.clearButton);
+
+        this.useWebSocketCheckBox = new JCheckBox("Use WebSocket");
+        Boolean useWebSocket = this._montoya.persistence().preferences().getBoolean("use_websocket");
+        if(useWebSocket == null)
+            useWebSocket = false; // default value
+        this.useWebSocketCheckBox.setSelected(useWebSocket);
+        this.useWebSocketCheckBox.addActionListener(e -> {
+            this._montoya.persistence().preferences().setBoolean("use_websocket", this.useWebSocketCheckBox.isSelected());
+        });
+        this.buttonView.add(this.useWebSocketCheckBox);
 
         // Add the button view to main UI component
         this.topLevel.add(this.buttonView, BorderLayout.NORTH);

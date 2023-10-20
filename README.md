@@ -167,4 +167,10 @@ Deserialized:
   }
 ]
 ```
+
+#### Contributors
+SignalR header support added by @R4ML1N
+WebSocket support has been added by Soroush Dalili (@irsdl)
+
+#### Copyright
 Copyright 2023 Aon plc

@@ -17,8 +17,8 @@ package com.gdssecurity.providers;
 
 import burp.api.montoya.MontoyaApi;
 import burp.api.montoya.ui.editor.extension.EditorCreationContext;
-import burp.api.montoya.ui.editor.extension.HttpRequestEditorProvider;
 import burp.api.montoya.ui.editor.extension.ExtensionProvidedHttpRequestEditor;
+import burp.api.montoya.ui.editor.extension.HttpRequestEditorProvider;
 import com.gdssecurity.editors.BTPHttpRequestEditor;
 
 /**

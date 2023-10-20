@@ -20,9 +20,11 @@ import burp.api.montoya.http.message.HttpRequestResponse;
 import burp.api.montoya.logging.Logging;
 import burp.api.montoya.ui.contextmenu.ContextMenuEvent;
 import burp.api.montoya.ui.contextmenu.ContextMenuItemsProvider;
+import burp.api.montoya.ui.contextmenu.WebSocketContextMenuEvent;
+import burp.api.montoya.ui.contextmenu.WebSocketMessage;
+import com.gdssecurity.helpers.BTPConstants;
 import com.gdssecurity.helpers.BlazorHelper;
 import com.gdssecurity.views.BTPView;
-import com.gdssecurity.helpers.BTPConstants;
 
 import javax.swing.*;
 import java.awt.*;
@@ -78,6 +80,32 @@ public class BTPContextMenuItemsProvider implements ContextMenuItemsProvider {
     }
 
     /**
+     * Gets called by Burpsuite since this is a registered menu items provider
+     * @param event This object can be queried to find out about HTTP websocket that are associated with the context menu invocation.
+     *
+     * @return - an arraylist of components to include in the right-click menu
+     */
+    public List<Component> provideMenuItems(WebSocketContextMenuEvent event) {
+        ArrayList<Component> menuItems = new ArrayList<>();
+
+        // Send to BTP tab for ad-hoc serialization
+        JMenuItem sendToBTP = new JMenuItem();
+        sendToBTP.setText(BTPConstants.SEND_TO_BTP_CAPTION);
+        sendToBTP.addActionListener(e -> {
+            WebSocketMessage selection;
+
+            if(event.selectedWebSocketMessages().isEmpty() && event.messageEditorWebSocket().isPresent()){
+                selection = event.messageEditorWebSocket().get().webSocketMessage();
+            }else{ // Selected on WS history
+                selection = event.selectedWebSocketMessages().get(0);
+            }
+
+            this.sendSelectionToBTP(selection);
+        });
+        menuItems.add(sendToBTP);
+        return menuItems;
+    }
+    /**
      * Handles the selection of "Send body to BTP tab" menu option
      * Sends the body from the selected request/response to editor of BTP tab
      * @param selection - the selected HttpRequestResponse object
@@ -95,4 +123,16 @@ public class BTPContextMenuItemsProvider implements ContextMenuItemsProvider {
             this.btpTab.setEditorText(selection.response().body());
         }
     }
+
+    private void sendSelectionToBTP(WebSocketMessage selection) {
+        if (selection.upgradeRequest().url() != null && !selection.upgradeRequest().url().contains(BTPConstants.BLAZOR_URL)) {
+            if (!selection.upgradeRequest().hasHeader(BTPConstants.SIGNALR_HEADER)) {
+                this._logging.logToError("[-] sendSelectionToBTP - Selected message is not BlazorPack.");
+                return;
+            }
+        }
+
+        this.btpTab.setEditorText(selection.payload());
+    }
+
 }

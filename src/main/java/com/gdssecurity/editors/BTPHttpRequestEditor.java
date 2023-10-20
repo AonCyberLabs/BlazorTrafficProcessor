@@ -132,26 +132,38 @@ public class BTPHttpRequestEditor implements ExtensionProvidedHttpRequestEditor 
         if (requestResponse == null || requestResponse.request() == null) {
             return false;
         }
+
         if (requestResponse.request().httpVersion() == null) {
             return false;
         }
+
         if (requestResponse.request().url() == null) {
             return false;
         }
+
         if (!this._montoya.scope().isInScope(requestResponse.request().url())) {
             return false;
         }
+
         if (requestResponse.request().contentType() == ContentType.JSON) {
             return false;
         }
+
         if (!requestResponse.request().url().contains(BTPConstants.BLAZOR_URL)) {
             if (!requestResponse.request().hasHeader(BTPConstants.SIGNALR_HEADER)) {
                 return false;
             }
         }
+
         if (requestResponse.request().body() == null || requestResponse.request().body().length() == 0) {
             return false;
         }
+
+        // Request during negotiation containing "{anything}\x1e", not valid blazor and BTP tab shouldn't be enabled
+        if (requestResponse.request().body().toString().startsWith("{") && requestResponse.request().body().toString().endsWith("}\u001E")) {
+            return false;
+        }
+
         return true;
     }
 

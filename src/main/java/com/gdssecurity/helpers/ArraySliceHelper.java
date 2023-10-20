@@ -31,6 +31,11 @@ public class ArraySliceHelper {
         if (start >= end) {
             throw new IllegalArgumentException("Start index for array slice must be < end index.");
         }
+
+        if (start < 0 || end > array.length) {
+            throw new IllegalArgumentException("Invalid indices for array slice: start=" + start + ", end=" + end);
+        }
+
         byte[] slicedArray = new byte[end - start];
         for (int i = 0; i < slicedArray.length; i++) {
             slicedArray[i] = array[start + i];

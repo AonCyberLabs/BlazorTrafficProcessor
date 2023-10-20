@@ -63,6 +63,16 @@ public class BTPHttpResponseHandler implements ProxyResponseHandler {
         if (!interceptedResponse.initiatingRequest().url().contains(BTPConstants.NEGOTIATE_URL) || interceptedResponse.statedMimeType() != MimeType.JSON) {
             return ProxyResponseReceivedAction.continueWith(interceptedResponse);
         }
+
+
+        Boolean useWebSocket = this._montoya.persistence().preferences().getBoolean("use_websocket");
+        if(useWebSocket == null)
+            useWebSocket = false; // default value
+        if(useWebSocket){
+            // Do not downgrade if the user has selected to use WebSockets
+            return ProxyResponseReceivedAction.continueWith(interceptedResponse);
+        }
+
         try {
             JSONObject body = new JSONObject(interceptedResponse.bodyToString());
             if (body.has("availableTransports")) {
