@@ -34,4 +34,51 @@ jobs:
         with:
           path: ./releases/*.jar
           name: Downloadable Extension File
-      
+      - name: Get previous tag for the branch
+        id: get_previous_tag
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            PREFIX="main_"
+          else
+            PREFIX="notmain_"
+          fi
+          PREVIOUS_TAG=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                             https://api.github.com/repos/${{ github.repository }}/git/refs/tags \
+                             | jq -r ".[] | select(.ref | startswith(\"refs/tags/${PREFIX}\")) | .ref" \
+                             | sort -V | tail -n 1 | sed "s|refs/tags/||")
+          
+          # Check if we found a tag
+          if [[ -z "$PREVIOUS_TAG" ]]; then
+              echo "No previous tag found for prefix ${PREFIX}."
+              echo "PREVIOUS_TAG=" >> $GITHUB_ENV
+          else
+              echo "PREVIOUS_TAG=$PREVIOUS_TAG" >> $GITHUB_ENV
+          fi
+      - name: Delete the previous tag
+        if: env.PREVIOUS_TAG != ''
+        run: |
+          gh release delete ${{ env.PREVIOUS_TAG }} -y
+          git push origin --delete ${{ env.PREVIOUS_TAG }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract new version
+        id: get_version
+        run: |
+          VERSION=$(grep "^version" build.gradle | awk -F\' '{print $2}' | tr -d \')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+      - name: Set release tag based on branch
+        id: vars
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "RELEASE_TAG=main_${VERSION}" >> $GITHUB_ENV
+          else
+            echo "RELEASE_TAG=notmain_${VERSION}" >> $GITHUB_ENV
+          fi
+      - name: Create Release using GitHub CLI
+        run: |
+          gh release create ${{ env.RELEASE_TAG }} ./releases/*.jar \
+            --title "Release ${{ env.RELEASE_TAG }}" \
+            --notes "This jar file has been built by GitHub automatically." \
+            --repo ${{ github.repository }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
