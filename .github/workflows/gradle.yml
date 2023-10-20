@@ -1,0 +1,84 @@
+# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+name: Java CI with Gradle
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 19
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'oracle'
+          java-version: '19'
+          cache: 'gradle'
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew build
+      - name: Creating the jar file
+        run: ./gradlew jar
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          path: ./releases/*.jar
+          name: Downloadable Extension File
+      - name: Get previous tag for the branch
+        id: get_previous_tag
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            PREFIX="MainBranch_"
+          else
+            PREFIX="NotMainBranch_"
+          fi
+          echo "PREFIX=$PREFIX" >> $GITHUB_ENV
+          PREVIOUS_TAG=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                             https://api.github.com/repos/${{ github.repository }}/git/refs/tags \
+                             | jq -r ".[] | select(.ref | startswith(\"refs/tags/${PREFIX}\")) | .ref" \
+                             | sort -V | tail -n 1 | sed "s|refs/tags/||")
+          
+          # Check if we found a tag
+          if [[ -z "$PREVIOUS_TAG" ]]; then
+              echo "No previous tag found for prefix ${PREFIX}."
+              echo "PREVIOUS_TAG=" >> $GITHUB_ENV
+          else
+              echo "PREVIOUS_TAG=$PREVIOUS_TAG" >> $GITHUB_ENV
+          fi
+      - name: Delete the previous tag
+        if: env.PREVIOUS_TAG != ''
+        run: |
+          gh release delete ${{ env.PREVIOUS_TAG }} -y
+          git push origin --delete ${{ env.PREVIOUS_TAG }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract new version
+        id: get_version
+        run: |
+          VERSION=$(grep "^version" build.gradle | awk -F\' '{print $2}' | tr -d \')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+      - name: Set release tag based on branch
+        id: vars
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "RELEASE_TAG=${PREFIX}${VERSION}" >> $GITHUB_ENV
+          else
+            echo "RELEASE_TAG=${PREFIX}${VERSION}" >> $GITHUB_ENV
+          fi
+      - name: Create Release using GitHub CLI
+        run: |
+          gh release create ${{ env.RELEASE_TAG }} ./releases/*.jar \
+            --title "Release ${{ env.RELEASE_TAG }}" \
+            --notes "This jar file has been built by GitHub automatically." \
+            --repo ${{ github.repository }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -25,6 +25,7 @@ import com.gdssecurity.helpers.BTPConstants;
 import com.gdssecurity.providers.BTPContextMenuItemsProvider;
 import com.gdssecurity.providers.BTPHttpRequestEditorProvider;
 import com.gdssecurity.providers.BTPHttpResponseEditorProvider;
+import com.gdssecurity.providers.BTPWebSocketEditorProvider;
 import com.gdssecurity.views.BTPView;
 
 /**
@@ -48,8 +49,11 @@ public class BlazorTrafficProcessor implements BurpExtension, ExtensionUnloading
         // Request/Response Editor Providers
         BTPHttpRequestEditorProvider requestEditorProvider = new BTPHttpRequestEditorProvider(this._montoya);
         BTPHttpResponseEditorProvider responseEditorProvider = new BTPHttpResponseEditorProvider(this._montoya);
+        BTPWebSocketEditorProvider webSocketEditorProvider = new BTPWebSocketEditorProvider(this._montoya);
+
         this._montoya.userInterface().registerHttpRequestEditorProvider(requestEditorProvider);
         this._montoya.userInterface().registerHttpResponseEditorProvider(responseEditorProvider);
+        this._montoya.userInterface().registerWebSocketMessageEditorProvider(webSocketEditorProvider);
 
         // Request/Response Handlers (for Highlighting + Downgrade WS to HTTP)
         BTPHttpResponseHandler downgradeHandler = new BTPHttpResponseHandler(this._montoya);

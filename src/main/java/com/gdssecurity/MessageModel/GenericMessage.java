@@ -106,7 +106,10 @@ public abstract class GenericMessage {
      * @return - a byte array containing the raw BlazorPack bytes
      */
     public byte[] toBlazorBytes() {
-        return this.blazorMessage.toByteArray();
+        if(this.blazorMessage != null)
+            return this.blazorMessage.toByteArray();
+        else
+            return new byte[]{};
     }
 
 }

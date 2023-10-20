@@ -4,16 +4,18 @@ A BurpSuite extension to aid pentesting web applications that use Blazor Server/
 ## Build
 
 ### Prerequisites
-- Install [Java 18](https://www.oracle.com/java/technologies/javase/jdk18-archive-downloads.html) on your building machine.
+- Install [Java 19](https://www.oracle.com/java/technologies/javase/jdk19-archive-downloads.html) on your building machine.
 - Install [Gradle](https://gradle.org/install/) on your building machine.
-- Ensure the `JAVA_HOME` environment variable is set to the JDK 18 path if you have multiple versions of Java installed.
+- Ensure the `JAVA_HOME` environment variable is set to the JDK 19 path if you have multiple versions of Java installed.
     - _NOTE: This project requires Java 17+._
 
 ### Build Steps
 1. Clone the repository with `git clone https://github.com/AonCyberLabs/BlazorTrafficProcessor`
 2. `cd BlazorTrafficProcessor`
 3. `gradle build`
-4. The built JAR file will be located at `BlazorTrafficProcessor/build/libs/BlazorTrafficProcessor-1.0.jar`
+4. The built JAR file will be located at `./build/libs/` or `./releases/`
+
+Note: The latest build should be automatically compiled by GitHub workflows (Actions)
 
 ## Usage
 
@@ -167,4 +169,14 @@ Deserialized:
   }
 ]
 ```
+
+#### Contributors
+
+SignalR header support added by [@R4ML1N](https://github.com/R4ML1N)
+
+WebSocket support has been added by Soroush Dalili [@irsdl](https://github.com/irsdl)
+
+
+#### Copyright
+
 Copyright 2023 Aon plc

@@ -97,27 +97,32 @@ public class BlazorHelper {
      */
     public ArrayList<GenericMessage> blazorUnpack(byte[] blob) {
         ArrayList<GenericMessage> messages = new ArrayList<>();
-        int blobIdx = 0;
-        int blobLength = blob.length;
-        while (blobIdx < blobLength) {
-            byte[] blobSlice = ArraySliceHelper.getArraySlice(blob, blobIdx, blobLength);
-            JSONObject varInt = null;
-            try {
-                varInt = VarIntHelper.extractVarInt(blobSlice);
-            } catch (IOException e) {
-                this.logging.logToError("[-] blazorUnpack - An IOException occurred while unpacking the provided blob: " + e.getMessage());
-                return null;
-            } catch (Exception e) {
-                this.logging.logToError("[-] blazorUnpack - An unexpected exception occurred while unpacking the blob: " + e.getMessage());
-                return null;
+        try{
+            int blobIdx = 0;
+            int blobLength = blob.length;
+            while (blobIdx < blobLength) {
+                byte[] blobSlice = ArraySliceHelper.getArraySlice(blob, blobIdx, blobLength);
+                JSONObject varInt = null;
+                try {
+                    varInt = VarIntHelper.extractVarInt(blobSlice);
+                } catch (IOException e) {
+                    this.logging.logToError("[-] blazorUnpack - An IOException occurred while unpacking the provided blob: " + e.getMessage());
+                    return null;
+                } catch (Exception e) {
+                    this.logging.logToError("[-] blazorUnpack - An unexpected exception occurred while unpacking the blob: " + e.getMessage());
+                    return null;
+                }
+                int bytesRead = varInt.getInt("bytesRead");
+                int msgSize = varInt.getInt("result");
+                byte[] messageBytes = ArraySliceHelper.getArraySlice(blob, blobIdx + bytesRead, blobIdx + bytesRead + msgSize);
+                GenericMessage msg = initializeMessage(messageBytes);
+                messages.add(msg);
+                blobIdx += bytesRead + msgSize;
             }
-            int bytesRead = varInt.getInt("bytesRead");
-            int msgSize = varInt.getInt("result");
-            byte[] messageBytes = ArraySliceHelper.getArraySlice(blob, blobIdx + bytesRead, blobIdx + bytesRead + msgSize);
-            GenericMessage msg = initializeMessage(messageBytes);
-            messages.add(msg);
-            blobIdx += bytesRead + msgSize;
+        }catch(Exception e){
+            messages.add(new DisplayErrorMessage("Message is incomplete or incompatible", _montoya));
         }
+
         return messages;
     }
 
@@ -139,7 +144,7 @@ public class BlazorHelper {
      * @param raw - a byte array containing the blazorpack bytes
      * @return an instantiated message object
      */
-    public GenericMessage initializeMessage(byte[] raw) {
+    private GenericMessage initializeMessage(byte[] raw) {
         MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(raw);
         try {
             int arrayHeader = unpacker.unpackArrayHeader();

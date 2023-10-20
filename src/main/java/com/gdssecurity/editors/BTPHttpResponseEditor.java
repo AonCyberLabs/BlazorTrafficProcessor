@@ -102,28 +102,43 @@ public class BTPHttpResponseEditor implements ExtensionProvidedHttpResponseEdito
         if (requestResponse == null || requestResponse.response() == null) {
             return false;
         }
+
         if (requestResponse.response().httpVersion() == null) {
             return false;
         }
+
         if (this._montoya.scope() == null) {
             return false;
         }
+
         if (requestResponse.response().httpVersion() == null) {
             return false;
         }
-        if (!requestResponse.url().contains(BTPConstants.BLAZOR_URL)) {
+
+        if (!requestResponse.request().url().contains(BTPConstants.BLAZOR_URL)) {
+            if (!requestResponse.request().hasHeader(BTPConstants.SIGNALR_HEADER)) {
+                return false;
+            }
+        }
+
+        if (!this._montoya.scope().isInScope(requestResponse.request().url())) {
             return false;
         }
-        if (!this._montoya.scope().isInScope(requestResponse.url())) {
-            return false;
-        }
+
         if (requestResponse.response().body() == null || requestResponse.response().body().length() == 0) {
             return false;
         }
+
         // Response during negotiation containing "{}\x1e", not valid blazor and BTP tab shouldn't be enabled
         if ( requestResponse.response().body().length() == 3 && requestResponse.response().body().toString().startsWith("{}")) {
             return false;
         }
+
+        // Response during negotiation containing "{anything}\x1e", not valid blazor and BTP tab shouldn't be enabled
+        if (requestResponse.response().body().toString().startsWith("{") && requestResponse.response().body().toString().endsWith("}\u001E")) {
+            return false;
+        }
+
         return true;
     }
 

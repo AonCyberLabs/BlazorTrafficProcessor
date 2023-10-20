@@ -4,33 +4,44 @@ plugins {
 }
 
 group 'com.gdssecurity'
-version '1.0'
-sourceCompatibility = 17
+version '1.1'
+sourceCompatibility = 19
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation 'org.msgpack:msgpack-core:0.9.3'
-    implementation 'net.portswigger.burp.extensions:montoya-api:2023.4'
-    implementation 'org.json:json:20220924'
-    implementation 'org.apache.parquet:parquet-common:1.12.3'
+    implementation 'org.msgpack:msgpack-core:0.9.6'
+    implementation 'net.portswigger.burp.extensions:montoya-api:2023.10.4'
+    implementation 'org.json:json:20230227'
+    implementation 'org.apache.parquet:parquet-common:1.13.1'
     implementation 'javax.xml.bind:jaxb-api:2.3.1'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
 }
 
 test {
-    useJUnitPlatform()
+    //useJUnitPlatform()
 }
 
-jar {
+jar{
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    manifest {
-        attributes "Main-Class": "com.gdssecurity.BlazorTrafficProcessor"
-    }
+    archivesBaseName = project.name
     from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        (configurations.runtimeClasspath).collect { it.isDirectory() ? it : zipTree(it) }
+    }{
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+        exclude "META-INF/*.txt"
     }
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:unchecked"
+}
+
+tasks.withType(Jar) {
+    destinationDirectory = file("$rootDir/releases/")
 }

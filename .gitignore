@@ -19,3 +19,8 @@ gradle-app.setting
 
 # Intellij
 .idea
+
+/out/
+gradle-app.setting
+.git
+/releases/*
