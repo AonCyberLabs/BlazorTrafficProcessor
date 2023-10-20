@@ -38,9 +38,9 @@ jobs:
         id: get_previous_tag
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            PREFIX="main_"
+            PREFIX="MainBranch_"
           else
-            PREFIX="notmain_"
+            PREFIX="NotMainBranch_"
           fi
           PREVIOUS_TAG=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                              https://api.github.com/repos/${{ github.repository }}/git/refs/tags \
@@ -70,9 +70,9 @@ jobs:
         id: vars
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            echo "RELEASE_TAG=main_${VERSION}" >> $GITHUB_ENV
+            echo "RELEASE_TAG=${PREFIX}${VERSION}" >> $GITHUB_ENV
           else
-            echo "RELEASE_TAG=notmain_${VERSION}" >> $GITHUB_ENV
+            echo "RELEASE_TAG=${PREFIX}${VERSION}" >> $GITHUB_ENV
           fi
       - name: Create Release using GitHub CLI
         run: |
